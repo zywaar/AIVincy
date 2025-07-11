@@ -141,6 +141,8 @@
         <button id="run-tests">Run All Tests</button>
         <button id="clear-tests">Clear Results</button>
         <button id="run-powerup-tests">Run Power-up Tests Only</button>
+        <button id="run-brick-tests">Run Brick Tests Only</button>
+        <button id="run-collision-tests">Run Collision Tests Only</button>
     </div>
 
     <div id="test-status" class="loading" style="display: none;">
@@ -159,6 +161,9 @@
         
         // Import all test files
         import './tests/powerup-tests.js';
+        import './tests/brick-tests.js';
+        import './tests/brick-layout-tests.js';
+        import './tests/collision-tests.js';
         
         // Capture console output
         const originalConsoleLog = console.log;
@@ -180,6 +185,8 @@
         const runTestsBtn = document.getElementById('run-tests');
         const clearTestsBtn = document.getElementById('clear-tests');
         const runPowerupTestsBtn = document.getElementById('run-powerup-tests');
+        const runBrickTestsBtn = document.getElementById('run-brick-tests');
+        const runCollisionTestsBtn = document.getElementById('run-collision-tests');
         const testStatus = document.getElementById('test-status');
         const testResults = document.getElementById('test-results');
         const consoleOutputDiv = document.getElementById('console-output');
@@ -201,28 +208,53 @@
 
         // Run power-up tests only
         runPowerupTestsBtn.addEventListener('click', async () => {
-            // Filter tests to only power-up related ones
-            const allTests = SimpleTest.tests.slice();
-            SimpleTest.tests = allTests.filter(test => 
+            await runFilteredTests(test => 
                 test.name.toLowerCase().includes('powerup') || 
                 test.name.toLowerCase().includes('power-up') ||
                 test.name.toLowerCase().includes('wide paddle') ||
                 test.name.toLowerCase().includes('slow ball') ||
                 test.name.toLowerCase().includes('multi-ball')
             );
+        });
+
+        // Run brick tests only
+        runBrickTestsBtn.addEventListener('click', async () => {
+            await runFilteredTests(test => 
+                test.name.toLowerCase().includes('brick') ||
+                test.name.toLowerCase().includes('layout')
+            );
+        });
+
+        // Run collision tests only
+        runCollisionTestsBtn.addEventListener('click', async () => {
+            await runFilteredTests(test => 
+                test.name.toLowerCase().includes('collision') ||
+                test.name.toLowerCase().includes('bounds') ||
+                test.name.toLowerCase().includes('overlap')
+            );
+        });
+
+        // Helper function to run filtered tests
+        async function runFilteredTests(filterFunction) {
+            const allTests = SimpleTest.tests.slice();
+            SimpleTest.tests = allTests.filter(filterFunction);
             
             await runTests();
             
             // Restore all tests
             SimpleTest.tests = allTests;
-        });
+        }
 
         async function runTests() {
             // Show loading
             testStatus.style.display = 'block';
             testStatus.textContent = 'Running tests...';
+            
+            // Disable all buttons during test run
             runTestsBtn.disabled = true;
             runPowerupTestsBtn.disabled = true;
+            runBrickTestsBtn.disabled = true;
+            runCollisionTestsBtn.disabled = true;
             
             // Clear previous results
             testResults.innerHTML = '';
@@ -240,10 +272,12 @@
                 console.error('Error running tests:', error);
                 testResults.innerHTML = `<div class="test-fail">Error running tests: ${error.message}</div>`;
             } finally {
-                // Hide loading
+                // Hide loading and re-enable buttons
                 testStatus.style.display = 'none';
                 runTestsBtn.disabled = false;
                 runPowerupTestsBtn.disabled = false;
+                runBrickTestsBtn.disabled = false;
+                runCollisionTestsBtn.disabled = false;
             }
         }
 

@@ -16,36 +16,34 @@
 
 ## Development Setup
 
-### File Structure
+### Simplified File Structure
 ```
 AIVincy/
-├── index.html              # Original single-file version
-├── index-original.html     # Backup of original
-├── index-modular.html      # New modular version
-├── README.md              # Project documentation
-├── src/                   # Source code (ES6 modules)
-│   ├── main.js           # Game initialization and main loop
-│   ├── config/           # Configuration
+├── index.html            # Main game entry point (modular version)
+├── README.md            # Updated project documentation
+├── src/                 # Source code (ES6 modules)
+│   ├── main.js         # Game initialization and main loop
+│   ├── config/         # Configuration
 │   │   └── GameConfig.js # Centralized game settings
-│   ├── core/             # Core systems
+│   ├── core/           # Core systems
 │   │   └── InputManager.js # Input handling
-│   ├── entities/         # Game objects
-│   │   ├── Ball.js       # Ball entity with physics
-│   │   ├── Paddle.js     # Paddle entity with controls
-│   │   ├── Brick.js      # Brick entity with health system
-│   │   └── PowerUp.js    # Power-up entity
-│   ├── systems/          # Game systems
+│   ├── entities/       # Game objects
+│   │   ├── Ball.js     # Ball entity with physics
+│   │   ├── Paddle.js   # Paddle entity with controls
+│   │   ├── Brick.js    # Brick entity with health system
+│   │   └── PowerUp.js  # Power-up entity
+│   ├── systems/        # Game systems
 │   │   └── PowerUpSystem.js # Enhanced power-up management
-│   └── utils/            # Utilities
-│       └── MathUtils.js  # Math and collision utilities
-├── tests/                # Testing framework
+│   └── utils/          # Utilities
+│       └── MathUtils.js # Math and collision utilities
+├── tests/              # Testing framework
 │   ├── test-framework.js # Simple browser-based test runner
-│   ├── test-runner.html  # Test interface
-│   └── tests/            # Test files
+│   ├── test-runner.html # Test interface
+│   └── tests/          # Test files
 │       └── powerup-tests.js # Power-up system tests
-└── memory-bank/          # Project documentation
-    ├── features/         # Feature-specific documentation
-    └── development/      # Development workflow documentation
+└── memory-bank/        # Project documentation
+    ├── features/       # Feature-specific documentation
+    └── development/    # Development workflow documentation
 ```
 
 ### Development Environment
@@ -89,10 +87,19 @@ AIVincy/
 ## Tool Usage Patterns
 
 ### Development Workflow
-1. **Edit**: Modify index.html in any text editor
-2. **Test**: Open/refresh in browser
-3. **Debug**: Use browser developer tools
-4. **Iterate**: Make changes and test immediately
+1. **Start HTTP Server**: `npx serve . -p 8000` (required for ES6 modules)
+2. **Edit**: Modify files in any text editor
+3. **Test**: Access via `http://localhost:PORT/index.html`
+4. **Debug**: Use browser developer tools
+5. **Iterate**: Make changes and refresh browser
+
+### HTTP Server Requirement
+- **Critical**: ES6 modules require HTTP protocol, not `file://`
+- **CORS Policy**: Browser blocks module imports from local files
+- **Server Options**: `npx serve`, Python `http.server`, PHP built-in server
+- **Access URLs**: 
+  - Game: `http://localhost:PORT/index.html`
+  - Tests: `http://localhost:PORT/tests/test-runner.html`
 
 ### Debugging Tools
 - **Browser DevTools**: Console logging, performance profiling

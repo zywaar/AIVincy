@@ -157,10 +157,10 @@ Game Controller (main.js)
 
 ## Code Organization
 
-### Modular Structure
+### Simplified Modular Structure
 ```
 AIVincy/
-├── index-modular.html (Entry point)
+├── index.html (Single entry point - modular version)
 ├── src/
 │   ├── main.js (Game controller and loop)
 │   ├── config/GameConfig.js (Centralized settings)

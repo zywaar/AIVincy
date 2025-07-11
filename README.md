@@ -6,9 +6,7 @@ A modern, modular implementation of the classic brick breaker game with AI-power
 
 ```
 AIVincy/
-├── index.html              # Original single-file version
-├── index-original.html     # Backup of original
-├── index-modular.html      # New modular version
+├── index.html              # Main game file (modular version)
 ├── README.md              # This file
 ├── src/                   # Source code (ES6 modules)
 │   ├── main.js           # Game initialization and main loop
@@ -37,11 +35,11 @@ AIVincy/
 
 ## 🚀 Quick Start
 
-### ⚠️ IMPORTANT: HTTP Server Required for Modular Version
+### ⚠️ IMPORTANT: HTTP Server Required
 
-The modular version (`index-modular.html`) uses ES6 modules and **requires an HTTP server** to function properly. Opening the file directly in a browser will result in CORS errors and a non-functional game.
+This game uses ES6 modules and **requires an HTTP server** to function properly. Opening the file directly in a browser will result in CORS errors and a non-functional game.
 
-### Option 1: Modular Version (Recommended)
+### Start the Game
 ```bash
 # Start HTTP server (choose one method)
 npx serve . -p 8000          # NPX serve (recommended)
@@ -50,15 +48,8 @@ php -S localhost:8000        # PHP built-in server
 ```
 
 Then access:
-- **Game**: `http://localhost:8000/index-modular.html`
+- **Game**: `http://localhost:8000/index.html`
 - **Tests**: `http://localhost:8000/tests/test-runner.html`
-
-### Option 2: Original Version (File Protocol Compatible)
-1. Open `index.html` directly in browser (works with `file://` protocol)
-2. All functionality in one file for comparison
-
-### Option 3: Quick Test Without Server
-If you need to test immediately without setting up a server, use `index.html` (original version) which works directly in the browser.
 
 ## ✨ Key Features
 
@@ -180,7 +171,7 @@ http://localhost:8000/tests/test-runner.html
 
 ### Development Setup
 1. **Start HTTP Server**: `npx serve . -p 8000` (required for ES6 modules)
-2. **Access Game**: `http://localhost:8000/index-modular.html`
+2. **Access Game**: `http://localhost:8000/index.html`
 3. **Run Tests**: `http://localhost:8000/tests/test-runner.html`
 
 ### Development Guidelines
@@ -188,7 +179,7 @@ http://localhost:8000/tests/test-runner.html
 2. **Write Tests**: Add tests for new functionality
 3. **Update Documentation**: Keep memory-bank up to date
 4. **Follow Patterns**: Use existing code patterns for consistency
-5. **Test Both Versions**: Ensure compatibility with both modular and original versions
+5. **Test Thoroughly**: Ensure all functionality works correctly
 
 ## 📝 License
 
@@ -202,7 +193,7 @@ This project is a proof of concept for modular game development and testing prac
 - **Cause**: CORS policy blocking ES6 modules
 - **Solution**: Use HTTP server instead of opening file directly
 - **Command**: `npx serve . -p 8000`
-- **Access**: `http://localhost:8000/index-modular.html`
+- **Access**: `http://localhost:8000/index.html`
 
 #### "Module not found" errors
 - **Cause**: Incorrect file paths or server not running
@@ -215,8 +206,7 @@ This project is a proof of concept for modular game development and testing prac
 ### File Compatibility
 | File | Direct Browser | HTTP Server | Notes |
 |------|----------------|-------------|-------|
-| `index.html` | ✅ Works | ✅ Works | Original version |
-| `index-modular.html` | ❌ CORS Error | ✅ Works | **Requires server** |
+| `index.html` | ❌ CORS Error | ✅ Works | **Requires server** |
 | `tests/test-runner.html` | ❌ CORS Error | ✅ Works | **Requires server** |
 
 ---

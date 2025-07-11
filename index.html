@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Adaptive Brick Ball Game</title>
+    <title>AI-Adaptive Brick Ball Game (Modular)</title>
     <style>
         body {
             margin: 0;
@@ -29,764 +29,189 @@
             box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
 
-        #gameInfo {
-            margin-top: 20px;
-            display: flex;
-            gap: 30px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .info-item {
-            color: #00ff88;
-        }
-
         #instructions {
             margin-top: 15px;
             text-align: center;
             color: #ccc;
         }
+
+        .info-panel {
+            margin-top: 20px;
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #00ff88;
+            max-width: 800px;
+        }
+
+        .info-panel h3 {
+            margin-top: 0;
+            color: #00ff88;
+        }
+
+        .module-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .module {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 3px;
+            border-left: 3px solid #00ff88;
+        }
+
+        .module-name {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .module-desc {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #00ff88;
+            color: #1a1a1a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #00cc66;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
-    <h1>AI-Adaptive Brick Ball</h1>
+    <h1>🎮 AI-Adaptive Brick Ball (Modular Architecture)</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     
-    <div id="gameInfo">
-        <div class="info-item">Score: <span id="score">0</span></div>
-        <div class="info-item">Lives: <span id="lives">3</span></div>
-        <div class="info-item">Level: <span id="level">1</span></div>
-    </div>
-    
     <div id="instructions">
-        Use LEFT/RIGHT arrow keys or mouse to move paddle
+        Use LEFT/RIGHT arrow keys or mouse to move paddle<br>
+        Press SPACE or click to launch ball | Press R to restart
     </div>
 
+    <div class="info-panel">
+        <h3>🏗️ Modular Architecture Status</h3>
+        <div class="module-status">
+            <div class="module">
+                <div class="module-name">Game Config</div>
+                <div class="module-desc">Centralized configuration</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Input Manager</div>
+                <div class="module-desc">Keyboard & mouse handling</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Power-Up System</div>
+                <div class="module-desc">Enhanced power-up management</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Entity Classes</div>
+                <div class="module-desc">Ball, Paddle, Brick, PowerUp</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Math Utils</div>
+                <div class="module-desc">Collision & math functions</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Test Framework</div>
+                <div class="module-desc">Automated testing system</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="testPowerUps()">🧪 Test Power-ups</button>
+            <button onclick="showModuleInfo()">📊 Module Info</button>
+            <button onclick="openTestRunner()">🔬 Run Tests</button>
+        </div>
+
+        <div id="status" class="status">
+            Loading modular game architecture...
+        </div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+    
     <script>
-        // Game constants
-        const CANVAS_WIDTH = 800;
-        const CANVAS_HEIGHT = 600;
-        const PADDLE_WIDTH = 100;
-        const PADDLE_HEIGHT = 15;
-        const BALL_RADIUS = 15;
-        const BALL_SPEED = 5;
-        const BRICK_ROWS = 6;
-        const BRICK_COLS = 10;
-        const BRICK_WIDTH = 75;
-        const BRICK_HEIGHT = 20;
-        const BRICK_PADDING = 5;
-
-        // Game states
-        const GAME_STATES = {
-            PLAYING: 'playing',
-            GAME_OVER: 'game_over',
-            WIN: 'win',
-            PAUSED: 'paused'
-        };
-
-        // Get canvas and context
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // Input handling
-        const keys = {};
-        let mouseX = 0;
-
-        // Paddle class
-        class Paddle {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.width = PADDLE_WIDTH;
-                this.height = PADDLE_HEIGHT;
-                this.speed = 8;
-                this.originalWidth = PADDLE_WIDTH;
-            }
-
-            update() {
-                // Keyboard controls
-                if (keys['ArrowLeft'] && this.x > 0) {
-                    this.x -= this.speed;
-                }
-                if (keys['ArrowRight'] && this.x < CANVAS_WIDTH - this.width) {
-                    this.x += this.speed;
-                }
-
-                // Mouse controls (alternative)
-                if (mouseX > 0) {
-                    this.x = mouseX - this.width / 2;
-                    // Keep paddle within bounds
-                    this.x = Math.max(0, Math.min(CANVAS_WIDTH - this.width, this.x));
-                }
-            }
-
-            render(ctx) {
-                // Paddle gradient
-                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
-                gradient.addColorStop(0, '#00ff88');
-                gradient.addColorStop(1, '#00cc66');
-                
-                ctx.fillStyle = gradient;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-                
-                // Paddle highlight
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.fillRect(this.x, this.y, this.width, 3);
-            }
-
-            getBounds() {
-                return {
-                    left: this.x,
-                    right: this.x + this.width,
-                    top: this.y,
-                    bottom: this.y + this.height
-                };
-            }
+        // Status updates and utility functions
+        const statusDiv = document.getElementById('status');
+        
+        function updateStatus(message) {
+            statusDiv.textContent = message;
+            console.log(message);
         }
 
-        // Brick class
-        class Brick {
-            constructor(x, y, color, health, points) {
-                this.x = x;
-                this.y = y;
-                this.width = BRICK_WIDTH;
-                this.height = BRICK_HEIGHT;
-                this.color = color;
-                this.health = health;
-                this.maxHealth = health;
-                this.points = points;
-                this.destroyed = false;
-            }
-
-            hit() {
-                this.health--;
-                if (this.health <= 0) {
-                    this.destroyed = true;
-                    return this.points;
-                }
-                return 0;
-            }
-
-            render(ctx) {
-                if (this.destroyed) return;
-
-                // Brick color based on health
-                let brickColor = this.color;
-                if (this.health < this.maxHealth) {
-                    // Darken color when damaged
-                    brickColor = this.getDamagedColor();
-                }
-
-                // Brick gradient
-                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
-                gradient.addColorStop(0, brickColor);
-                gradient.addColorStop(1, this.getDarkerColor(brickColor));
-                
-                ctx.fillStyle = gradient;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-                
-                // Brick border
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(this.x, this.y, this.width, this.height);
-                
-                // Brick highlight
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.fillRect(this.x, this.y, this.width, 3);
-            }
-
-            getDamagedColor() {
-                // Make brick darker when damaged
-                const colors = {
-                    '#ff4444': '#cc2222',
-                    '#ff8844': '#cc5522',
-                    '#ffff44': '#cccc22',
-                    '#44ff44': '#22cc22'
-                };
-                return colors[this.color] || this.color;
-            }
-
-            getDarkerColor(color) {
-                // Create darker version for gradient
-                const colors = {
-                    '#ff4444': '#aa2222',
-                    '#ff8844': '#aa4422',
-                    '#ffff44': '#aaaa22',
-                    '#44ff44': '#22aa22',
-                    '#cc2222': '#881111',
-                    '#cc5522': '#882211',
-                    '#cccc22': '#888811',
-                    '#22cc22': '#118811'
-                };
-                return colors[color] || color;
-            }
-
-            getBounds() {
-                return {
-                    left: this.x,
-                    right: this.x + this.width,
-                    top: this.y,
-                    bottom: this.y + this.height
-                };
-            }
-        }
-
-        // Ball class
-        class Ball {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.radius = BALL_RADIUS;
-                this.speedX = BALL_SPEED * (Math.random() > 0.5 ? 1 : -1);
-                this.speedY = -BALL_SPEED;
-                this.originalSpeed = BALL_SPEED;
-                this.onPaddle = true;
-            }
-
-            update(paddle) {
-                if (this.onPaddle) {
-                    // Ball follows paddle when on paddle
-                    this.x = paddle.x + paddle.width / 2;
-                    this.y = paddle.y - this.radius;
-                    
-                    // Launch ball with spacebar or click
-                    if (keys[' '] || keys['Space']) {
-                        this.launch();
-                    }
-                } else {
-                    // Update position
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-
-                    // Wall collisions
-                    if (this.x - this.radius <= 0 || this.x + this.radius >= CANVAS_WIDTH) {
-                        this.speedX = -this.speedX;
-                        this.x = Math.max(this.radius, Math.min(CANVAS_WIDTH - this.radius, this.x));
-                    }
-
-                    if (this.y - this.radius <= 0) {
-                        this.speedY = -this.speedY;
-                        this.y = this.radius;
-                    }
-
-                    // Ball fell off bottom
-                    if (this.y > CANVAS_HEIGHT + 50) {
-                        return 'lost';
-                    }
-
-                    // Paddle collision
-                    this.checkPaddleCollision(paddle);
-                }
-
-                return 'active';
-            }
-
-            launch() {
-                this.onPaddle = false;
-                this.speedX = BALL_SPEED * (Math.random() > 0.5 ? 1 : -1);
-                this.speedY = -BALL_SPEED;
-            }
-
-            checkPaddleCollision(paddle) {
-                const ballBounds = this.getBounds();
-                const paddleBounds = paddle.getBounds();
-
-                if (ballBounds.bottom >= paddleBounds.top &&
-                    ballBounds.top <= paddleBounds.bottom &&
-                    ballBounds.right >= paddleBounds.left &&
-                    ballBounds.left <= paddleBounds.right) {
-                    
-                    // Calculate bounce angle based on where ball hits paddle
-                    const hitPos = (this.x - paddle.x) / paddle.width;
-                    const bounceAngle = (hitPos - 0.5) * Math.PI / 3; // Max 60 degrees
-                    
-                    const speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
-                    this.speedX = speed * Math.sin(bounceAngle);
-                    this.speedY = -Math.abs(speed * Math.cos(bounceAngle));
-                    
-                    // Ensure ball is above paddle
-                    this.y = paddle.y - this.radius;
-                }
-            }
-
-            render(ctx) {
-                // Ball gradient
-                const gradient = ctx.createRadialGradient(
-                    this.x - 2, this.y - 2, 0,
-                    this.x, this.y, this.radius
-                );
-                gradient.addColorStop(0, '#ffffff');
-                gradient.addColorStop(0.3, '#ffff88');
-                gradient.addColorStop(1, '#ffaa00');
-                
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Ball highlight
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.beginPath();
-                ctx.arc(this.x - 2, this.y - 2, this.radius / 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            getBounds() {
-                return {
-                    left: this.x - this.radius,
-                    right: this.x + this.radius,
-                    top: this.y - this.radius,
-                    bottom: this.y + this.radius
-                };
-            }
-
-            reset(paddle) {
-                this.onPaddle = true;
-                this.x = paddle.x + paddle.width / 2;
-                this.y = paddle.y - this.radius;
-                this.speedX = BALL_SPEED * (Math.random() > 0.5 ? 1 : -1);
-                this.speedY = -BALL_SPEED;
-            }
-        }
-
-        // PowerUp class
-        class PowerUp {
-            constructor(x, y, type) {
-                this.x = x;
-                this.y = y;
-                this.width = 30;
-                this.height = 15;
-                this.type = type;
-                this.speedY = 2;
-                this.collected = false;
-                this.colors = {
-                    'wide_paddle': '#00ff88',
-                    'multi_ball': '#ff8844',
-                    'slow_ball': '#4488ff',
-                    'laser_paddle': '#ff4488'
-                };
-            }
-
-            update() {
-                this.y += this.speedY;
-                // Remove if it falls off screen
-                if (this.y > CANVAS_HEIGHT) {
-                    this.collected = true; // Mark for removal
-                }
-            }
-
-            render(ctx) {
-                if (this.collected) return;
-
-                // PowerUp gradient
-                const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
-                gradient.addColorStop(0, this.colors[this.type]);
-                gradient.addColorStop(1, this.getDarkerColor(this.colors[this.type]));
-                
-                ctx.fillStyle = gradient;
-                ctx.fillRect(this.x, this.y, this.width, this.height);
-                
-                // PowerUp border
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(this.x, this.y, this.width, this.height);
-                
-                // PowerUp text
-                ctx.fillStyle = '#fff';
-                ctx.font = 'bold 10px Arial';
-                ctx.textAlign = 'center';
-                const text = this.type.split('_')[0].toUpperCase();
-                ctx.fillText(text, this.x + this.width/2, this.y + this.height/2 + 3);
-            }
-
-            getDarkerColor(color) {
-                const colors = {
-                    '#00ff88': '#00cc66',
-                    '#ff8844': '#cc5522',
-                    '#4488ff': '#2266cc',
-                    '#ff4488': '#cc2266'
-                };
-                return colors[color] || color;
-            }
-
-            getBounds() {
-                return {
-                    left: this.x,
-                    right: this.x + this.width,
-                    top: this.y,
-                    bottom: this.y + this.height
-                };
-            }
-
-            checkCollision(paddle) {
-                const powerUpBounds = this.getBounds();
-                const paddleBounds = paddle.getBounds();
-
-                return (powerUpBounds.bottom >= paddleBounds.top &&
-                        powerUpBounds.top <= paddleBounds.bottom &&
-                        powerUpBounds.right >= paddleBounds.left &&
-                        powerUpBounds.left <= paddleBounds.right);
-            }
-        }
-
-        // Game class
-        class Game {
-            constructor() {
-                this.state = GAME_STATES.PLAYING;
-                this.score = 0;
-                this.lives = 3;
-                this.level = 1;
-                
-                // Initialize game objects
-                this.paddle = new Paddle(CANVAS_WIDTH / 2 - PADDLE_WIDTH / 2, CANVAS_HEIGHT - 40);
-                this.ball = new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - BALL_RADIUS);
-                this.bricks = [];
-                this.powerUps = [];
-                this.activePowerUps = [];
-                
-                this.createBricks();
-                this.updateUI();
-            }
-
-            dropPowerUp(x, y) {
-                // 20% chance to drop a power-up
-                if (Math.random() < 0.2) {
-                    const powerUpTypes = ['wide_paddle', 'multi_ball', 'slow_ball'];
-                    const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
-                    this.powerUps.push(new PowerUp(x, y, randomType));
-                }
-            }
-
-            activatePowerUp(type) {
-                const duration = 15000; // 15 seconds
-                const powerUp = {
-                    type: type,
-                    endTime: Date.now() + duration
-                };
-
-                switch(type) {
-                    case 'wide_paddle':
-                        this.paddle.width = this.paddle.originalWidth * 1.5;
-                        break;
-                    case 'multi_ball':
-                        // Create 2 additional balls
-                        for (let i = 0; i < 2; i++) {
-                            const newBall = new Ball(this.ball.x, this.ball.y);
-                            newBall.onPaddle = false;
-                            newBall.speedX = BALL_SPEED * (Math.random() > 0.5 ? 1 : -1);
-                            newBall.speedY = -BALL_SPEED;
-                            // For now, we'll just modify the main ball (simplified)
-                        }
-                        break;
-                    case 'slow_ball':
-                        this.ball.speedX *= 0.7;
-                        this.ball.speedY *= 0.7;
-                        break;
-                }
-
-                this.activePowerUps.push(powerUp);
-            }
-
-            updatePowerUps() {
-                // Update falling power-ups
-                for (let i = this.powerUps.length - 1; i >= 0; i--) {
-                    const powerUp = this.powerUps[i];
-                    powerUp.update();
-
-                    // Check collision with paddle
-                    if (powerUp.checkCollision(this.paddle)) {
-                        this.activatePowerUp(powerUp.type);
-                        this.powerUps.splice(i, 1);
-                        continue;
-                    }
-
-                    // Remove if collected or off screen
-                    if (powerUp.collected) {
-                        this.powerUps.splice(i, 1);
-                    }
-                }
-
-                // Update active power-ups (check for expiration)
-                for (let i = this.activePowerUps.length - 1; i >= 0; i--) {
-                    const powerUp = this.activePowerUps[i];
-                    if (Date.now() >= powerUp.endTime) {
-                        // Deactivate power-up
-                        switch(powerUp.type) {
-                            case 'wide_paddle':
-                                this.paddle.width = this.paddle.originalWidth;
-                                break;
-                            case 'slow_ball':
-                                // Restore original speed
-                                const currentSpeed = Math.sqrt(this.ball.speedX * this.ball.speedX + this.ball.speedY * this.ball.speedY);
-                                const speedMultiplier = BALL_SPEED / currentSpeed;
-                                this.ball.speedX *= speedMultiplier;
-                                this.ball.speedY *= speedMultiplier;
-                                break;
-                        }
-                        this.activePowerUps.splice(i, 1);
-                    }
-                }
-            }
-
-            createBricks() {
-                this.bricks = [];
-                const startX = (CANVAS_WIDTH - (BRICK_COLS * (BRICK_WIDTH + BRICK_PADDING) - BRICK_PADDING)) / 2;
-                const startY = 50;
-
-                // Brick types: Red, Orange, Yellow, Green (top to bottom)
-                const brickTypes = [
-                    { color: '#ff4444', health: 1, points: 10 }, // Red
-                    { color: '#ff8844', health: 1, points: 20 }, // Orange  
-                    { color: '#ffff44', health: 2, points: 30 }, // Yellow
-                    { color: '#44ff44', health: 2, points: 40 }, // Green
-                    { color: '#4444ff', health: 1, points: 15 }, // Blue
-                    { color: '#ff44ff', health: 1, points: 25 }  // Purple
-                ];
-
-                for (let row = 0; row < BRICK_ROWS; row++) {
-                    for (let col = 0; col < BRICK_COLS; col++) {
-                        const x = startX + col * (BRICK_WIDTH + BRICK_PADDING);
-                        const y = startY + row * (BRICK_HEIGHT + BRICK_PADDING);
-                        
-                        const brickType = brickTypes[row % brickTypes.length];
-                        const brick = new Brick(x, y, brickType.color, brickType.health, brickType.points);
-                        this.bricks.push(brick);
-                    }
-                }
-            }
-
-            checkBallBrickCollisions() {
-                for (let i = 0; i < this.bricks.length; i++) {
-                    const brick = this.bricks[i];
-                    if (brick.destroyed) continue;
-
-                    const ballBounds = this.ball.getBounds();
-                    const brickBounds = brick.getBounds();
-
-                    // AABB collision detection
-                    if (ballBounds.right >= brickBounds.left &&
-                        ballBounds.left <= brickBounds.right &&
-                        ballBounds.bottom >= brickBounds.top &&
-                        ballBounds.top <= brickBounds.bottom) {
-                        
-                        // Hit the brick
-                        const points = brick.hit();
-                        this.score += points;
-                        this.updateUI();
-
-                        // Drop power-up if brick is destroyed
-                        if (brick.destroyed) {
-                            this.dropPowerUp(brick.x + brick.width / 2, brick.y + brick.height);
-                        }
-
-                        // Calculate bounce direction
-                        const ballCenterX = this.ball.x;
-                        const ballCenterY = this.ball.y;
-                        const brickCenterX = brick.x + brick.width / 2;
-                        const brickCenterY = brick.y + brick.height / 2;
-
-                        const deltaX = ballCenterX - brickCenterX;
-                        const deltaY = ballCenterY - brickCenterY;
-
-                        // Determine which side was hit
-                        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                            // Hit left or right side
-                            this.ball.speedX = -this.ball.speedX;
-                        } else {
-                            // Hit top or bottom
-                            this.ball.speedY = -this.ball.speedY;
-                        }
-
-                        // Check win condition
-                        if (this.checkWinCondition()) {
-                            this.state = GAME_STATES.WIN;
-                        }
-
-                        break; // Only hit one brick per frame
-                    }
-                }
-            }
-
-            checkWinCondition() {
-                return this.bricks.every(brick => brick.destroyed);
-            }
-
-            update() {
-                if (this.state !== GAME_STATES.PLAYING) return;
-
-                this.paddle.update();
-                const ballStatus = this.ball.update(this.paddle);
-
-                // Check ball-brick collisions
-                if (!this.ball.onPaddle) {
-                    this.checkBallBrickCollisions();
-                }
-
-                // Update power-ups
-                this.updatePowerUps();
-
-                if (ballStatus === 'lost') {
-                    this.lives--;
-                    this.updateUI();
-                    
-                    if (this.lives <= 0) {
-                        this.state = GAME_STATES.GAME_OVER;
-                    } else {
-                        this.ball.reset(this.paddle);
-                    }
-                }
-            }
-
-            render(ctx) {
-                // Clear canvas
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-                if (this.state === GAME_STATES.PLAYING) {
-                    // Render bricks
-                    this.bricks.forEach(brick => brick.render(ctx));
-                    
-                    // Render power-ups
-                    this.powerUps.forEach(powerUp => powerUp.render(ctx));
-                    
-                    this.paddle.render(ctx);
-                    this.ball.render(ctx);
-
-                    // Render active power-up indicators
-                    this.renderPowerUpIndicators(ctx);
-
-                    // Instructions when ball is on paddle
-                    if (this.ball.onPaddle) {
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                        ctx.font = '20px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('Press SPACE to launch ball', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
-                    }
-                } else if (this.state === GAME_STATES.GAME_OVER) {
-                    this.renderGameOver(ctx);
-                } else if (this.state === GAME_STATES.WIN) {
-                    this.renderWin(ctx);
-                }
-            }
-
-            renderGameOver(ctx) {
-                // Game over screen
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-                
-                ctx.fillStyle = '#ff4444';
-                ctx.font = 'bold 48px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('GAME OVER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 50);
-                
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '24px Arial';
-                ctx.fillText(`Final Score: ${this.score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 20);
-                
-                ctx.font = '18px Arial';
-                ctx.fillText('Press R to restart', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 60);
-            }
-
-            renderWin(ctx) {
-                // Win screen
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-                ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-                
-                ctx.fillStyle = '#00ff88';
-                ctx.font = 'bold 48px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('YOU WIN!', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 50);
-                
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '24px Arial';
-                ctx.fillText(`Final Score: ${this.score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 20);
-                
-                ctx.font = '18px Arial';
-                ctx.fillText('Press R to restart', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 60);
-            }
-
-            renderPowerUpIndicators(ctx) {
-                // Show active power-ups in top-right corner
-                let yOffset = 10;
-                this.activePowerUps.forEach(powerUp => {
-                    const timeLeft = Math.max(0, powerUp.endTime - Date.now()) / 1000;
-                    
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                    ctx.fillRect(CANVAS_WIDTH - 120, yOffset, 110, 25);
-                    
-                    ctx.fillStyle = '#00ff88';
-                    ctx.font = '12px Arial';
-                    ctx.textAlign = 'left';
-                    ctx.fillText(`${powerUp.type.replace('_', ' ').toUpperCase()}`, CANVAS_WIDTH - 115, yOffset + 12);
-                    ctx.fillText(`${timeLeft.toFixed(1)}s`, CANVAS_WIDTH - 115, yOffset + 22);
-                    
-                    yOffset += 30;
-                });
-            }
-
-            updateUI() {
-                document.getElementById('score').textContent = this.score;
-                document.getElementById('lives').textContent = this.lives;
-                document.getElementById('level').textContent = this.level;
-            }
-
-            restart() {
-                this.state = GAME_STATES.PLAYING;
-                this.score = 0;
-                this.lives = 3;
-                this.level = 1;
-                
-                this.paddle = new Paddle(CANVAS_WIDTH / 2 - PADDLE_WIDTH / 2, CANVAS_HEIGHT - 40);
-                this.ball = new Ball(this.paddle.x + this.paddle.width / 2, this.paddle.y - BALL_RADIUS);
-                this.bricks = [];
-                this.powerUps = [];
-                this.activePowerUps = [];
-                
-                this.createBricks();
-                this.updateUI();
-            }
-        }
-
-        // Initialize game
-        const game = new Game();
-
-        // Event listeners
-        document.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
-            keys[e.code] = true;
+        function testPowerUps() {
+            updateStatus('🧪 Testing power-up system...');
             
-            if (e.key === 'r' || e.key === 'R') {
-                if (game.state === GAME_STATES.GAME_OVER || game.state === GAME_STATES.WIN) {
-                    game.restart();
+            // Access the game instance (will be available after main.js loads)
+            setTimeout(() => {
+                if (window.game) {
+                    // Force activate a power-up for testing
+                    window.game.powerUpSystem.forceActivatePowerUp('wide_paddle', {
+                        paddle: window.game.paddle,
+                        ball: window.game.ball,
+                        balls: [window.game.ball]
+                    });
+                    updateStatus('✅ Wide Paddle power-up activated for testing!');
+                } else {
+                    updateStatus('❌ Game not yet initialized');
                 }
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
-            keys[e.code] = false;
-        });
-
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-        });
-
-        canvas.addEventListener('click', (e) => {
-            if (game.ball.onPaddle) {
-                game.ball.launch();
-            }
-        });
-
-        // Game loop
-        function gameLoop() {
-            game.update();
-            game.render(ctx);
-            requestAnimationFrame(gameLoop);
+            }, 100);
         }
 
-        // Start game
-        gameLoop();
+        function showModuleInfo() {
+            const moduleCount = 6; // Number of main modules
+            const entityCount = 4; // Ball, Paddle, Brick, PowerUp
+            updateStatus(`📊 Loaded ${moduleCount} core modules, ${entityCount} entity classes. Modular architecture active!`);
+        }
+
+        function openTestRunner() {
+            updateStatus('🔬 Opening test runner...');
+            window.open('tests/test-runner.html', '_blank');
+        }
+
+        // Listen for game initialization
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateStatus('🚀 Modular game architecture loaded successfully!');
+            }, 1000);
+        });
+
+        // Make game accessible for testing
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for main.js to create the game instance
+            const checkGame = setInterval(() => {
+                if (window.game) {
+                    clearInterval(checkGame);
+                    updateStatus('🎮 Game instance ready for testing and interaction!');
+                }
+            }, 100);
+        });
     </script>
 </body>
 </html>
