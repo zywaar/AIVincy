@@ -34,34 +34,91 @@ export class Brick {
   }
 
   /**
-   * Render the brick
+   * Convert hex color to RGB values
+   */
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
+
+  /**
+   * Render the brick with Tron-style glass appearance using original colors
    */
   render(ctx) {
     if (this.destroyed) return;
 
-    // Brick color based on health
-    let brickColor = this.color;
-    if (this.health < this.maxHealth) {
-      // Darken color when damaged
-      brickColor = this.getDamagedColor();
-    }
-
-    // Brick gradient
-    const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
-    gradient.addColorStop(0, brickColor);
-    gradient.addColorStop(1, MathUtils.darkenColor(brickColor));
+    const healthPercent = this.getHealthPercentage();
+    const baseOpacity = 0.15 + (healthPercent * 0.25); // More transparent when damaged
     
-    ctx.fillStyle = gradient;
+    // Convert brick color to RGB
+    const rgb = this.hexToRgb(this.color);
+    if (!rgb) return; // Skip if color conversion fails
+    
+    ctx.save();
+    
+    // Glass-like transparent fill using original color
+    const glassGradient = ctx.createLinearGradient(
+      this.x, this.y, this.x, this.y + this.height
+    );
+    glassGradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${baseOpacity * 0.8})`);
+    glassGradient.addColorStop(0.5, `rgba(${Math.min(255, rgb.r + 50)}, ${Math.min(255, rgb.g + 50)}, ${Math.min(255, rgb.b + 50)}, ${baseOpacity * 0.4})`);
+    glassGradient.addColorStop(1, `rgba(${Math.max(0, rgb.r - 30)}, ${Math.max(0, rgb.g - 30)}, ${Math.max(0, rgb.b - 30)}, ${baseOpacity * 0.6})`);
+    
+    ctx.fillStyle = glassGradient;
     ctx.fillRect(this.x, this.y, this.width, this.height);
     
-    // Brick border
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 1;
+    // Glowing edges using original color
+    const glowIntensity = healthPercent * 0.8 + 0.2; // Dimmer when damaged
+    ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${glowIntensity})`;
+    ctx.lineWidth = 2;
     ctx.strokeRect(this.x, this.y, this.width, this.height);
     
-    // Brick highlight
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.fillRect(this.x, this.y, this.width, 3);
+    // Outer glow effect
+    ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${glowIntensity * 0.3})`;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(this.x - 1, this.y - 1, this.width + 2, this.height + 2);
+    
+    // Inner light reflection (top edge)
+    const reflectionGradient = ctx.createLinearGradient(
+      this.x, this.y, this.x, this.y + this.height * 0.3
+    );
+    reflectionGradient.addColorStop(0, `rgba(255, 255, 255, ${healthPercent * 0.4})`);
+    reflectionGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = reflectionGradient;
+    ctx.fillRect(this.x + 2, this.y + 1, this.width - 4, this.height * 0.3);
+    
+    // Corner highlights for glass effect
+    ctx.fillStyle = `rgba(255, 255, 255, ${healthPercent * 0.6})`;
+    ctx.fillRect(this.x + 1, this.y + 1, 3, 3); // Top-left
+    ctx.fillRect(this.x + this.width - 4, this.y + 1, 3, 3); // Top-right
+    
+    // Damage indicator - cracks using original color
+    if (this.health < this.maxHealth) {
+      // Add crack-like lines for damaged bricks
+      ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${(1 - healthPercent) * 0.5})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      
+      // Random crack pattern based on brick position (consistent)
+      const seed = this.x + this.y;
+      const crack1X = this.x + (seed % this.width);
+      const crack1Y = this.y + ((seed * 2) % this.height);
+      const crack2X = this.x + ((seed * 3) % this.width);
+      const crack2Y = this.y + ((seed * 4) % this.height);
+      
+      ctx.moveTo(crack1X, this.y);
+      ctx.lineTo(crack2X, this.y + this.height);
+      ctx.moveTo(this.x, crack1Y);
+      ctx.lineTo(this.x + this.width, crack2Y);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
   }
 
   /**

@@ -33,20 +33,56 @@ export class Paddle {
   }
 
   /**
-   * Render the paddle
+   * Render the paddle with Tron-style appearance
    */
   render(ctx) {
-    // Paddle gradient
-    const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
-    gradient.addColorStop(0, '#00ff88');
-    gradient.addColorStop(1, '#00cc66');
+    ctx.save();
     
-    ctx.fillStyle = gradient;
+    // Main paddle body with glass-like appearance
+    const paddleGradient = ctx.createLinearGradient(
+      this.x, this.y, this.x, this.y + this.height
+    );
+    paddleGradient.addColorStop(0, 'rgba(0, 212, 255, 0.3)');
+    paddleGradient.addColorStop(0.5, 'rgba(102, 229, 255, 0.2)');
+    paddleGradient.addColorStop(1, 'rgba(0, 153, 204, 0.4)');
+    
+    ctx.fillStyle = paddleGradient;
     ctx.fillRect(this.x, this.y, this.width, this.height);
     
-    // Paddle highlight
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.fillRect(this.x, this.y, this.width, 3);
+    // Glowing edges
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.9)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(this.x, this.y, this.width, this.height);
+    
+    // Outer glow effect
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.4)';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(this.x - 1, this.y - 1, this.width + 2, this.height + 2);
+    
+    // Top highlight for glass effect
+    const highlightGradient = ctx.createLinearGradient(
+      this.x, this.y, this.x, this.y + this.height * 0.4
+    );
+    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+    highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = highlightGradient;
+    ctx.fillRect(this.x + 2, this.y + 1, this.width - 4, this.height * 0.4);
+    
+    // Center line for detail
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.6)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(this.x + this.width / 2, this.y + 2);
+    ctx.lineTo(this.x + this.width / 2, this.y + this.height - 2);
+    ctx.stroke();
+    
+    // Corner accents
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fillRect(this.x + 1, this.y + 1, 2, 2); // Top-left
+    ctx.fillRect(this.x + this.width - 3, this.y + 1, 2, 2); // Top-right
+    
+    ctx.restore();
   }
 
   /**

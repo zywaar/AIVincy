@@ -11,6 +11,11 @@ export class Ball {
     this.speedY = -GameConfig.ball.speed;
     this.originalSpeed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
     this.onPaddle = true;
+    
+    // Trail system for Tron effect
+    this.trail = [];
+    this.maxTrailLength = 15; // Number of trail points
+    this.trailDistance = 100; // Maximum trail distance in pixels
   }
 
   /**
@@ -21,8 +26,13 @@ export class Ball {
       // Ball follows paddle when on paddle
       this.x = paddle.getCenterX();
       this.y = paddle.y - this.radius + 1; // Small overlap for collision detection
+      // Clear trail when on paddle
+      this.trail = [];
       return 'on_paddle';
     } else {
+      // Update trail before moving
+      this.updateTrail();
+      
       // Update position
       this.x += this.speedX;
       this.y += this.speedY;
@@ -45,6 +55,22 @@ export class Ball {
 
       return 'active';
     }
+  }
+
+  /**
+   * Update trail system
+   */
+  updateTrail() {
+    // Add current position to trail
+    this.trail.push({ x: this.x, y: this.y });
+    
+    // Remove old trail points that are too far or too many
+    this.trail = this.trail.filter((point, index) => {
+      const distance = Math.sqrt(
+        Math.pow(point.x - this.x, 2) + Math.pow(point.y - this.y, 2)
+      );
+      return distance <= this.trailDistance && index >= this.trail.length - this.maxTrailLength;
+    });
   }
 
   /**
@@ -82,28 +108,105 @@ export class Ball {
   }
 
   /**
-   * Render the ball
+   * Render the ball with Tron-style trail effect
    */
   render(ctx) {
-    // Ball gradient
-    const gradient = ctx.createRadialGradient(
-      this.x - 2, this.y - 2, 0,
+    // Render trail first (behind ball)
+    this.renderTrail(ctx);
+    
+    // Tron-style light blue ball with glow
+    const glowRadius = this.radius * 2;
+    
+    // Outer glow
+    const outerGlow = ctx.createRadialGradient(
+      this.x, this.y, 0,
+      this.x, this.y, glowRadius
+    );
+    outerGlow.addColorStop(0, 'rgba(0, 212, 255, 0.8)');
+    outerGlow.addColorStop(0.5, 'rgba(0, 212, 255, 0.3)');
+    outerGlow.addColorStop(1, 'rgba(0, 212, 255, 0)');
+    
+    ctx.fillStyle = outerGlow;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, glowRadius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Main ball gradient (very light blue to white)
+    const ballGradient = ctx.createRadialGradient(
+      this.x - this.radius * 0.3, this.y - this.radius * 0.3, 0,
       this.x, this.y, this.radius
     );
-    gradient.addColorStop(0, '#ffffff');
-    gradient.addColorStop(0.3, '#ffff88');
-    gradient.addColorStop(1, '#ffaa00');
+    ballGradient.addColorStop(0, '#FFFFFF');
+    ballGradient.addColorStop(0.3, '#E6F9FF');
+    ballGradient.addColorStop(0.7, '#66E5FF');
+    ballGradient.addColorStop(1, '#00D4FF');
     
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = ballGradient;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();
     
-    // Ball highlight
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    // Inner bright core
+    const coreGradient = ctx.createRadialGradient(
+      this.x - this.radius * 0.4, this.y - this.radius * 0.4, 0,
+      this.x, this.y, this.radius * 0.6
+    );
+    coreGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+    coreGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    
+    ctx.fillStyle = coreGradient;
     ctx.beginPath();
-    ctx.arc(this.x - 2, this.y - 2, this.radius / 3, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.radius * 0.6, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  /**
+   * Render the light trail
+   */
+  renderTrail(ctx) {
+    if (this.trail.length < 2) return;
+    
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen'; // Additive blending for glow effect
+    
+    // Draw trail segments
+    for (let i = 1; i < this.trail.length; i++) {
+      const current = this.trail[i];
+      const previous = this.trail[i - 1];
+      
+      // Calculate opacity based on distance from current position
+      const distance = Math.sqrt(
+        Math.pow(current.x - this.x, 2) + Math.pow(current.y - this.y, 2)
+      );
+      const opacity = Math.max(0, 1 - (distance / this.trailDistance));
+      const segmentOpacity = opacity * (i / this.trail.length); // Fade towards tail
+      
+      // Trail segment gradient
+      const trailGradient = ctx.createLinearGradient(
+        previous.x, previous.y, current.x, current.y
+      );
+      trailGradient.addColorStop(0, `rgba(0, 212, 255, ${segmentOpacity * 0.8})`);
+      trailGradient.addColorStop(1, `rgba(102, 229, 255, ${segmentOpacity * 0.4})`);
+      
+      // Draw trail segment
+      ctx.strokeStyle = trailGradient;
+      ctx.lineWidth = this.radius * 0.8 * segmentOpacity;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(previous.x, previous.y);
+      ctx.lineTo(current.x, current.y);
+      ctx.stroke();
+      
+      // Add glow to trail segment
+      ctx.strokeStyle = `rgba(0, 212, 255, ${segmentOpacity * 0.3})`;
+      ctx.lineWidth = this.radius * 1.5 * segmentOpacity;
+      ctx.beginPath();
+      ctx.moveTo(previous.x, previous.y);
+      ctx.lineTo(current.x, current.y);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
   }
 
   /**

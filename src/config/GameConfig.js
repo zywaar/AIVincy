@@ -16,7 +16,7 @@ export const GameConfig = {
 
   // Ball settings
   ball: {
-    radius: 15,
+    radius: 10,
     speed: 5
   },
 
