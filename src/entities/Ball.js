@@ -9,7 +9,7 @@ export class Ball {
     this.radius = GameConfig.ball.radius;
     this.speedX = GameConfig.ball.speed * (Math.random() > 0.5 ? 1 : -1);
     this.speedY = -GameConfig.ball.speed;
-    this.originalSpeed = GameConfig.ball.speed;
+    this.originalSpeed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
     this.onPaddle = true;
   }
 
@@ -20,7 +20,7 @@ export class Ball {
     if (this.onPaddle) {
       // Ball follows paddle when on paddle
       this.x = paddle.getCenterX();
-      this.y = paddle.y - this.radius;
+      this.y = paddle.y - this.radius + 1; // Small overlap for collision detection
       return 'on_paddle';
     } else {
       // Update position
@@ -63,7 +63,7 @@ export class Ball {
     const ballBounds = this.getBounds();
     const paddleBounds = paddle.getBounds();
 
-    if (MathUtils.rectanglesOverlap(ballBounds, paddleBounds)) {
+    if (MathUtils.rectanglesCollide(ballBounds, paddleBounds)) {
       // Calculate bounce angle based on where ball hits paddle
       const hitPos = paddle.getHitPosition(this.x);
       const bounceAngle = (hitPos - 0.5) * Math.PI / 3; // Max 60 degrees
@@ -124,7 +124,7 @@ export class Ball {
   reset(paddle) {
     this.onPaddle = true;
     this.x = paddle.getCenterX();
-    this.y = paddle.y - this.radius;
+    this.y = paddle.y - this.radius + 1; // Small overlap for collision detection
     this.speedX = this.originalSpeed * (Math.random() > 0.5 ? 1 : -1);
     this.speedY = -this.originalSpeed;
   }

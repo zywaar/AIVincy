@@ -131,7 +131,7 @@ SimpleTest.test('MathUtils rectangles overlap - edge cases', () => {
 // Test Ball-Paddle Collision
 SimpleTest.test('Ball-paddle collision detection', () => {
   const paddle = new Paddle(100, 500);
-  const ball = new Ball(paddle.getCenterX(), paddle.y - GameConfig.ball.radius);
+  const ball = new Ball(paddle.getCenterX(), paddle.y - GameConfig.ball.radius + 1);
   
   // Test collision detection method exists and works
   SimpleTest.assertTruthy(typeof ball.handlePaddleCollision === 'function', 'Ball should have paddle collision method');

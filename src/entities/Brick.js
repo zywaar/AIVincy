@@ -12,7 +12,7 @@ export class Brick {
     this.health = health;
     this.maxHealth = health;
     this.points = points;
-    this.destroyed = false;
+    this.destroyed = health <= 0; // Immediately destroyed if health is 0 or negative
   }
 
   /**
@@ -20,6 +20,11 @@ export class Brick {
    * Returns points if brick is destroyed, 0 otherwise
    */
   hit() {
+    // Don't process hits on already destroyed bricks
+    if (this.destroyed) {
+      return 0;
+    }
+    
     this.health--;
     if (this.health <= 0) {
       this.destroyed = true;
@@ -108,6 +113,7 @@ export class Brick {
    * Get health percentage (for visual effects)
    */
   getHealthPercentage() {
+    if (this.maxHealth === 0) return 0;
     return this.health / this.maxHealth;
   }
 
@@ -145,7 +151,7 @@ export class Brick {
     const ballBounds = ball.getBounds();
     const brickBounds = this.getBounds();
 
-    if (MathUtils.rectanglesOverlap(ballBounds, brickBounds)) {
+    if (MathUtils.rectanglesCollide(ballBounds, brickBounds)) {
       // Calculate which side was hit
       const ballCenterX = ball.x;
       const ballCenterY = ball.y;

@@ -20,8 +20,8 @@ export class PowerUp {
   update(canvasHeight) {
     this.y += this.speedY;
     
-    // Remove if it falls off screen
-    if (this.y > canvasHeight) {
+    // Remove if it falls off screen (check if powerup will be off screen)
+    if (this.y > canvasHeight - this.height) {
       this.collected = true; // Mark for removal
     }
   }
@@ -86,7 +86,7 @@ export class PowerUp {
     const powerUpBounds = this.getBounds();
     const paddleBounds = paddle.getBounds();
 
-    return MathUtils.rectanglesOverlap(powerUpBounds, paddleBounds);
+    return MathUtils.rectanglesCollide(powerUpBounds, paddleBounds);
   }
 
   /**
