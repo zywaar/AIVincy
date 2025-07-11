@@ -13,11 +13,23 @@ export class InputManager {
     document.addEventListener('keydown', (e) => {
       this.keys[e.key] = true;
       this.keys[e.code] = true;
+      
+      // Prevent default behavior for game-relevant keys
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Space'].includes(e.key) ||
+          ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'].includes(e.code)) {
+        e.preventDefault();
+      }
     });
 
     document.addEventListener('keyup', (e) => {
       this.keys[e.key] = false;
       this.keys[e.code] = false;
+      
+      // Prevent default behavior for game-relevant keys
+      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'Space'].includes(e.key) ||
+          ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'].includes(e.code)) {
+        e.preventDefault();
+      }
     });
 
     // Mouse events

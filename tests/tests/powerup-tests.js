@@ -118,11 +118,12 @@ SimpleTest.test('Slow Ball power-up reduces ball speed', () => {
   const system = new PowerUpSystem();
   const paddle = new Paddle(100, 585);
   const ball = new Ball(150, 570);
+  const balls = [ball];
   
   const originalSpeedX = ball.speedX;
   const originalSpeedY = ball.speedY;
   
-  system.activatePowerUp('slow_ball', { paddle, ball });
+  system.activatePowerUp('slow_ball', { paddle, balls });
   
   SimpleTest.assertApproxEqual(ball.speedX, originalSpeedX * 0.7, 0.1);
   SimpleTest.assertApproxEqual(ball.speedY, originalSpeedY * 0.7, 0.1);
@@ -132,11 +133,12 @@ SimpleTest.test('Slow Ball power-up restores speed on deactivation', () => {
   const system = new PowerUpSystem();
   const paddle = new Paddle(100, 585);
   const ball = new Ball(150, 570);
+  const balls = [ball];
   
   const originalSpeed = ball.getCurrentSpeed();
   
   // Activate power-up
-  const activePowerUp = system.activatePowerUp('slow_ball', { paddle, ball });
+  const activePowerUp = system.activatePowerUp('slow_ball', { paddle, balls });
   
   // Verify speed is reduced
   const slowSpeed = ball.getCurrentSpeed();
@@ -157,13 +159,51 @@ SimpleTest.test('Multi-ball power-up creates additional balls', () => {
   const ball = new Ball(150, 570);
   const balls = [ball];
   
-  system.activatePowerUp('multi_ball', { paddle, ball, balls });
+  system.activatePowerUp('multi_ball', { paddle, balls });
   
   SimpleTest.assertEqual(balls.length, 3); // Original + 2 new balls
   
   // Check that new balls are not on paddle
   balls.slice(1).forEach(newBall => {
     SimpleTest.assertFalsy(newBall.onPaddle);
+  });
+});
+
+SimpleTest.test('Multi-ball spawns at paddle position', () => {
+  const system = new PowerUpSystem();
+  const paddle = new Paddle(200, 500); // Specific paddle position
+  const ball = new Ball(100, 300); // Ball at different position
+  ball.onPaddle = false; // Make sure ball is active
+  const balls = [ball];
+  
+  system.activatePowerUp('multi_ball', { paddle, balls });
+  
+  SimpleTest.assertEqual(balls.length, 3); // Original + 2 new balls
+  
+  // Check that new balls spawn at paddle position, not ball position
+  const newBalls = balls.slice(1); // Get the 2 new balls
+  newBalls.forEach(newBall => {
+    SimpleTest.assertEqual(newBall.x, paddle.getCenterX(), 'New ball should spawn at paddle center X');
+    SimpleTest.assertEqual(newBall.y, paddle.y - GameConfig.ball.radius, 'New ball should spawn at paddle Y minus ball radius');
+    SimpleTest.assertFalsy(newBall.onPaddle, 'New ball should not be on paddle');
+  });
+});
+
+SimpleTest.test('Multi-ball spawn position independent of reference ball', () => {
+  const system = new PowerUpSystem();
+  const paddle = new Paddle(300, 400);
+  const ball = new Ball(50, 100); // Ball far from paddle
+  ball.onPaddle = false;
+  const balls = [ball];
+  
+  system.activatePowerUp('multi_ball', { paddle, balls });
+  
+  const newBalls = balls.slice(1);
+  newBalls.forEach(newBall => {
+    // New ball position should match paddle, not reference ball
+    SimpleTest.assertNotEqual(newBall.x, ball.x, 'New ball X should not match reference ball X');
+    SimpleTest.assertNotEqual(newBall.y, ball.y, 'New ball Y should not match reference ball Y');
+    SimpleTest.assertEqual(newBall.x, paddle.getCenterX(), 'New ball should spawn at paddle center');
   });
 });
 

@@ -111,7 +111,7 @@ export class PowerUpSystem {
    * Apply power-up effect
    */
   applyPowerUpEffect(type, gameObjects) {
-    const { paddle, ball, balls } = gameObjects;
+    const { paddle, balls } = gameObjects;
     
     switch(type) {
       case 'wide_paddle':
@@ -121,11 +121,28 @@ export class PowerUpSystem {
       case 'multi_ball':
         // Create 2 additional balls
         if (balls && balls.length < 5) { // Limit total balls
+          // Find a reference ball (preferably not on paddle)
+          const refBall = balls.find(b => !b.onPaddle) || balls[0];
+          
           for (let i = 0; i < 2; i++) {
-            const newBall = new (ball.constructor)(ball.x, ball.y);
+            // Spawn new balls at paddle position, not ball position
+            const newBall = new (refBall.constructor)(
+              paddle.getCenterX(), 
+              paddle.y - GameConfig.ball.radius
+            );
             newBall.onPaddle = false;
-            newBall.speedX = ball.originalSpeed * (Math.random() > 0.5 ? 1 : -1);
-            newBall.speedY = -ball.originalSpeed;
+            
+            // Random direction but same speed
+            const currentSpeed = refBall.getCurrentSpeed();
+            const angle = Math.random() * Math.PI * 2; // Random angle
+            newBall.speedX = currentSpeed * Math.cos(angle);
+            newBall.speedY = currentSpeed * Math.sin(angle);
+            
+            // Ensure upward component if reference ball was going up
+            if (refBall.speedY < 0) {
+              newBall.speedY = -Math.abs(newBall.speedY);
+            }
+            
             balls.push(newBall);
           }
         }
@@ -135,8 +152,6 @@ export class PowerUpSystem {
         // Apply to all balls
         if (balls) {
           balls.forEach(b => b.setSpeed(0.7));
-        } else {
-          ball.setSpeed(0.7);
         }
         break;
     }
@@ -147,7 +162,7 @@ export class PowerUpSystem {
    */
   deactivatePowerUp(activePowerUp) {
     const { type, gameObjects } = activePowerUp;
-    const { paddle, ball, balls } = gameObjects;
+    const { paddle, balls } = gameObjects;
     
     switch(type) {
       case 'wide_paddle':
@@ -158,8 +173,6 @@ export class PowerUpSystem {
         // Restore original speed to all balls
         if (balls) {
           balls.forEach(b => b.normalizeSpeed());
-        } else {
-          ball.normalizeSpeed();
         }
         break;
         

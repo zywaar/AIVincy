@@ -29,6 +29,14 @@ export class SimpleTest {
   }
 
   /**
+   * Assert that two values are not equal
+   */
+  static assertNotEqual(actual, expected, message = null) {
+    const defaultMessage = `Expected ${actual} to not equal ${expected}`;
+    this.assert(actual !== expected, message || defaultMessage);
+  }
+
+  /**
    * Assert that a value is truthy
    */
   static assertTruthy(value, message = 'Expected truthy value') {

@@ -204,9 +204,10 @@ SimpleTest.test('Multi-hit bricks are clearly identified', () => {
   console.log(`Multi-hit bricks (${multiHitBricks.length}):`, multiHitBricks.map(b => `${b.color} (${b.health} hits)`));
   console.log(`Single-hit bricks (${singleHitBricks.length}):`, singleHitBricks.map(b => `${b.color} (${b.health} hit)`));
   
-  // Ensure we have both types for game variety
-  SimpleTest.assertTruthy(multiHitBricks.length > 0, 'Game should have some multi-hit bricks for challenge');
-  SimpleTest.assertTruthy(singleHitBricks.length > 0, 'Game should have some single-hit bricks for progression');
+  // All bricks now have health = 2 as per requirements
+  SimpleTest.assertTruthy(multiHitBricks.length > 0, 'Game should have multi-hit bricks for challenge');
+  SimpleTest.assertEqual(multiHitBricks.length, GameConfig.brickTypes.length, 'All bricks should be multi-hit (health = 2)');
+  SimpleTest.assertEqual(singleHitBricks.length, 0, 'No single-hit bricks as per requirements');
 });
 
 console.log('✅ Brick core functionality tests loaded');

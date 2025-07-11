@@ -20,10 +20,10 @@ class Game {
       GameConfig.canvas.height - GameConfig.paddle.yOffset
     );
     
-    this.ball = new Ball(
+    this.balls = [new Ball(
       this.paddle.getCenterX(),
       this.paddle.y - GameConfig.ball.radius
-    );
+    )];
     
     this.bricks = Brick.createBrickLayout();
     this.score = 0;
@@ -41,21 +41,29 @@ class Game {
     // Update paddle
     this.paddle.update(this.inputManager, GameConfig.canvas.width);
     
-    // Update ball
-    const ballStatus = this.ball.update(this.paddle, GameConfig.canvas.width, GameConfig.canvas.height);
-    
-    // Handle ball launch
-    if (this.ball.onPaddle && this.inputManager.isBallLaunchPressed()) {
-      this.ball.launch();
+    // Update all balls
+    for (let i = this.balls.length - 1; i >= 0; i--) {
+      const ball = this.balls[i];
+      const ballStatus = ball.update(this.paddle, GameConfig.canvas.width, GameConfig.canvas.height);
+      
+      // Handle ball launch (only for balls on paddle)
+      if (ball.onPaddle && this.inputManager.isBallLaunchPressed()) {
+        ball.launch();
+      }
+      
+      // Handle paddle collision
+      if (!ball.onPaddle) {
+        ball.handlePaddleCollision(this.paddle);
+      }
+      
+      // Check brick collisions for this ball
+      this.checkBrickCollisions(ball);
+      
+      // Remove ball if lost
+      if (ballStatus === 'lost') {
+        this.balls.splice(i, 1);
+      }
     }
-    
-    // Handle paddle collision
-    if (!this.ball.onPaddle) {
-      this.ball.handlePaddleCollision(this.paddle);
-    }
-    
-    // Check brick collisions
-    this.checkBrickCollisions();
     
     // Update power-up system
     this.powerUpSystem.update(GameConfig.canvas.height);
@@ -65,18 +73,21 @@ class Game {
     collectedPowerUps.forEach(powerUp => {
       this.powerUpSystem.activatePowerUp(powerUp.type, {
         paddle: this.paddle,
-        ball: this.ball,
-        balls: [this.ball] // For multi-ball support
+        balls: this.balls // Pass balls array for multi-ball support
       });
     });
     
-    // Handle ball loss
-    if (ballStatus === 'lost') {
+    // Check if all balls lost
+    if (this.balls.length === 0) {
       this.lives--;
       if (this.lives <= 0) {
         this.state = GameConfig.states.GAME_OVER;
       } else {
-        this.ball.reset(this.paddle);
+        // Reset to single ball
+        this.balls = [new Ball(
+          this.paddle.getCenterX(),
+          this.paddle.y - GameConfig.ball.radius
+        )];
       }
     }
     
@@ -86,18 +97,30 @@ class Game {
     }
   }
 
-  checkBrickCollisions() {
+  checkBrickCollisions(ball) {
     for (const brick of this.bricks) {
-      const collisionSide = brick.checkCollisionWithBall(this.ball);
+      const collisionSide = brick.checkCollisionWithBall(ball);
       if (collisionSide) {
         const points = brick.hit();
         this.score += points;
         
-        // Bounce ball
+        // Improved bounce with position correction
         if (collisionSide === 'horizontal') {
-          this.ball.reverseX();
+          ball.reverseX();
+          // Position correction to prevent sticking
+          if (ball.x < brick.getCenterX()) {
+            ball.x = brick.getBounds().left - ball.radius;
+          } else {
+            ball.x = brick.getBounds().right + ball.radius;
+          }
         } else {
-          this.ball.reverseY();
+          ball.reverseY();
+          // Position correction
+          if (ball.y < brick.getCenterY()) {
+            ball.y = brick.getBounds().top - ball.radius;
+          } else {
+            ball.y = brick.getBounds().bottom + ball.radius;
+          }
         }
         
         // Drop power-up if brick is destroyed
@@ -105,7 +128,7 @@ class Game {
           this.powerUpSystem.tryDropPowerUp(brick.getCenterX(), brick.getCenterY());
         }
         
-        break; // Only hit one brick per frame
+        break; // Only hit one brick per ball per frame
       }
     }
   }
@@ -124,7 +147,7 @@ class Game {
       
       // Render game objects
       this.paddle.render(this.ctx);
-      this.ball.render(this.ctx);
+      this.balls.forEach(ball => ball.render(this.ctx));
       
       // Render power-up indicators
       this.powerUpSystem.renderActivePowerUps(this.ctx, GameConfig.canvas.width);
@@ -132,8 +155,8 @@ class Game {
       // Render UI
       this.renderUI();
       
-      // Instructions when ball is on paddle
-      if (this.ball.onPaddle) {
+      // Instructions when any ball is on paddle
+      if (this.balls.some(ball => ball.onPaddle)) {
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         this.ctx.font = '20px Arial';
         this.ctx.textAlign = 'center';
@@ -179,7 +202,13 @@ class Game {
     this.lives = GameConfig.game.initialLives;
     this.state = GameConfig.states.PLAYING;
     this.bricks = Brick.createBrickLayout();
-    this.ball.reset(this.paddle);
+    
+    // Reset to single ball
+    this.balls = [new Ball(
+      this.paddle.getCenterX(),
+      this.paddle.y - GameConfig.ball.radius
+    )];
+    
     this.powerUpSystem.clear();
   }
 

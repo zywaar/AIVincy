@@ -136,9 +136,10 @@ SimpleTest.test('Multi-hit brick rows identification', () => {
   console.log('Multi-hit rows:', multiHitRows);
   console.log('Single-hit rows:', singleHitRows);
   
-  // This test documents the current behavior - rows 2 and 3 are multi-hit
+  // All bricks now have health = 2 as per requirements
   SimpleTest.assertTruthy(multiHitRows.length > 0, 'Should have multi-hit rows');
-  SimpleTest.assertTruthy(singleHitRows.length > 0, 'Should have single-hit rows');
+  SimpleTest.assertEqual(multiHitRows.length, config.rows, 'All rows should be multi-hit (health = 2)');
+  SimpleTest.assertEqual(singleHitRows.length, 0, 'No single-hit rows as per requirements');
 });
 
 // Test Brick Spacing and Padding

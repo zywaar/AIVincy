@@ -53,12 +53,12 @@ export const GameConfig = {
 
   // Brick types with health and points
   brickTypes: [
-    { color: '#ff4444', health: 1, points: 10 }, // Red
-    { color: '#ff8844', health: 1, points: 20 }, // Orange  
+    { color: '#ff4444', health: 2, points: 10 }, // Red
+    { color: '#ff8844', health: 2, points: 20 }, // Orange  
     { color: '#ffff44', health: 2, points: 30 }, // Yellow
     { color: '#44ff44', health: 2, points: 40 }, // Green
-    { color: '#4444ff', health: 1, points: 15 }, // Blue
-    { color: '#ff44ff', health: 1, points: 25 }  // Purple
+    { color: '#4444ff', health: 2, points: 15 }, // Blue
+    { color: '#ff44ff', health: 2, points: 25 }  // Purple
   ],
 
   // Game states
