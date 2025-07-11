@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brick Ball Game - Test Runner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: white;
+        }
+
+        h1 {
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        .test-summary {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #00ff88;
+        }
+
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-pass {
+            background-color: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid #00ff88;
+        }
+
+        .test-fail {
+            background-color: rgba(255, 68, 68, 0.1);
+            border-left: 4px solid #ff4444;
+        }
+
+        .test-status {
+            font-size: 16px;
+            min-width: 20px;
+        }
+
+        .test-name {
+            flex-grow: 1;
+            font-weight: bold;
+        }
+
+        .test-duration {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .test-error {
+            color: #ff6666;
+            font-size: 12px;
+            margin-top: 5px;
+            font-family: monospace;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #00ff88;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #00cc66;
+        }
+
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            color: #00ff88;
+            font-style: italic;
+        }
+
+        .console-output {
+            background-color: #000;
+            color: #00ff88;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .stat {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Brick Ball Game - Test Runner</h1>
+    
+    <div class="controls">
+        <button id="run-tests">Run All Tests</button>
+        <button id="clear-tests">Clear Results</button>
+        <button id="run-powerup-tests">Run Power-up Tests Only</button>
+    </div>
+
+    <div id="test-status" class="loading" style="display: none;">
+        Running tests...
+    </div>
+
+    <div id="test-results"></div>
+
+    <div id="console-output" class="console-output" style="display: none;">
+        <strong>Console Output:</strong><br>
+        <div id="console-content"></div>
+    </div>
+
+    <script type="module">
+        import { SimpleTest } from './test-framework.js';
+        
+        // Import all test files
+        import './tests/powerup-tests.js';
+        
+        // Capture console output
+        const originalConsoleLog = console.log;
+        let consoleOutput = '';
+        
+        console.log = function(...args) {
+            const message = args.join(' ');
+            consoleOutput += message + '\n';
+            originalConsoleLog.apply(console, args);
+            
+            // Update console display
+            const consoleContent = document.getElementById('console-content');
+            if (consoleContent) {
+                consoleContent.textContent = consoleOutput;
+            }
+        };
+
+        // UI Elements
+        const runTestsBtn = document.getElementById('run-tests');
+        const clearTestsBtn = document.getElementById('clear-tests');
+        const runPowerupTestsBtn = document.getElementById('run-powerup-tests');
+        const testStatus = document.getElementById('test-status');
+        const testResults = document.getElementById('test-results');
+        const consoleOutputDiv = document.getElementById('console-output');
+
+        // Run all tests
+        runTestsBtn.addEventListener('click', async () => {
+            await runTests();
+        });
+
+        // Clear results
+        clearTestsBtn.addEventListener('click', () => {
+            SimpleTest.clear();
+            testResults.innerHTML = '';
+            consoleOutput = '';
+            document.getElementById('console-content').textContent = '';
+            consoleOutputDiv.style.display = 'none';
+            testStatus.style.display = 'none';
+        });
+
+        // Run power-up tests only
+        runPowerupTestsBtn.addEventListener('click', async () => {
+            // Filter tests to only power-up related ones
+            const allTests = SimpleTest.tests.slice();
+            SimpleTest.tests = allTests.filter(test => 
+                test.name.toLowerCase().includes('powerup') || 
+                test.name.toLowerCase().includes('power-up') ||
+                test.name.toLowerCase().includes('wide paddle') ||
+                test.name.toLowerCase().includes('slow ball') ||
+                test.name.toLowerCase().includes('multi-ball')
+            );
+            
+            await runTests();
+            
+            // Restore all tests
+            SimpleTest.tests = allTests;
+        });
+
+        async function runTests() {
+            // Show loading
+            testStatus.style.display = 'block';
+            testStatus.textContent = 'Running tests...';
+            runTestsBtn.disabled = true;
+            runPowerupTestsBtn.disabled = true;
+            
+            // Clear previous results
+            testResults.innerHTML = '';
+            consoleOutput = '';
+            consoleOutputDiv.style.display = 'block';
+            
+            try {
+                // Run tests
+                await SimpleTest.runAll();
+                
+                // Show results
+                displayResults();
+                
+            } catch (error) {
+                console.error('Error running tests:', error);
+                testResults.innerHTML = `<div class="test-fail">Error running tests: ${error.message}</div>`;
+            } finally {
+                // Hide loading
+                testStatus.style.display = 'none';
+                runTestsBtn.disabled = false;
+                runPowerupTestsBtn.disabled = false;
+            }
+        }
+
+        function displayResults() {
+            const results = SimpleTest.getResults();
+            const passed = results.filter(r => r.status === 'PASS').length;
+            const failed = results.filter(r => r.status === 'FAIL').length;
+            const total = results.length;
+            
+            // Create summary with stats
+            const summary = document.createElement('div');
+            summary.className = 'test-summary';
+            summary.innerHTML = `
+                <h2>Test Results Summary</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">${total}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" style="color: #00ff88;">${passed}</div>
+                        <div class="stat-label">Passed</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" style="color: ${failed > 0 ? '#ff4444' : '#00ff88'};">${failed}</div>
+                        <div class="stat-label">Failed</div>
+                    </div>
+                </div>
+                <p style="margin-top: 15px;">
+                    ${failed === 0 ? 
+                        '🎉 All tests passed! Your power-up system is working correctly.' : 
+                        `⚠️ ${failed} test(s) failed. Check the details below.`
+                    }
+                </p>
+            `;
+            testResults.appendChild(summary);
+            
+            // Add individual results
+            results.forEach(result => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `test-result test-${result.status.toLowerCase()}`;
+                
+                let content = `
+                    <span class="test-status">${result.status === 'PASS' ? '✅' : '❌'}</span>
+                    <span class="test-name">${result.name}</span>
+                `;
+                
+                if (result.status === 'PASS') {
+                    content += `<span class="test-duration">${result.duration}ms</span>`;
+                } else {
+                    content += `<div class="test-error">Error: ${result.error}</div>`;
+                }
+                
+                resultDiv.innerHTML = content;
+                testResults.appendChild(resultDiv);
+            });
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Test runner loaded. Click "Run All Tests" to begin.');
+            console.log(`📊 ${SimpleTest.tests.length} tests available.`);
+        });
+    </script>
+</body>
+</html>

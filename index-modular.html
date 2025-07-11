@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Adaptive Brick Ball Game (Modular)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        #gameCanvas {
+            border: 2px solid #00ff88;
+            background-color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        #instructions {
+            margin-top: 15px;
+            text-align: center;
+            color: #ccc;
+        }
+
+        .info-panel {
+            margin-top: 20px;
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #00ff88;
+            max-width: 800px;
+        }
+
+        .info-panel h3 {
+            margin-top: 0;
+            color: #00ff88;
+        }
+
+        .module-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .module {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 3px;
+            border-left: 3px solid #00ff88;
+        }
+
+        .module-name {
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .module-desc {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #00ff88;
+            color: #1a1a1a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #00cc66;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 AI-Adaptive Brick Ball (Modular Architecture)</h1>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <div id="instructions">
+        Use LEFT/RIGHT arrow keys or mouse to move paddle<br>
+        Press SPACE or click to launch ball | Press R to restart
+    </div>
+
+    <div class="info-panel">
+        <h3>🏗️ Modular Architecture Status</h3>
+        <div class="module-status">
+            <div class="module">
+                <div class="module-name">Game Config</div>
+                <div class="module-desc">Centralized configuration</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Input Manager</div>
+                <div class="module-desc">Keyboard & mouse handling</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Power-Up System</div>
+                <div class="module-desc">Enhanced power-up management</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Entity Classes</div>
+                <div class="module-desc">Ball, Paddle, Brick, PowerUp</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Math Utils</div>
+                <div class="module-desc">Collision & math functions</div>
+            </div>
+            <div class="module">
+                <div class="module-name">Test Framework</div>
+                <div class="module-desc">Automated testing system</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="testPowerUps()">🧪 Test Power-ups</button>
+            <button onclick="showModuleInfo()">📊 Module Info</button>
+            <button onclick="openTestRunner()">🔬 Run Tests</button>
+        </div>
+
+        <div id="status" class="status">
+            Loading modular game architecture...
+        </div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+    
+    <script>
+        // Status updates and utility functions
+        const statusDiv = document.getElementById('status');
+        
+        function updateStatus(message) {
+            statusDiv.textContent = message;
+            console.log(message);
+        }
+
+        function testPowerUps() {
+            updateStatus('🧪 Testing power-up system...');
+            
+            // Access the game instance (will be available after main.js loads)
+            setTimeout(() => {
+                if (window.game) {
+                    // Force activate a power-up for testing
+                    window.game.powerUpSystem.forceActivatePowerUp('wide_paddle', {
+                        paddle: window.game.paddle,
+                        ball: window.game.ball,
+                        balls: [window.game.ball]
+                    });
+                    updateStatus('✅ Wide Paddle power-up activated for testing!');
+                } else {
+                    updateStatus('❌ Game not yet initialized');
+                }
+            }, 100);
+        }
+
+        function showModuleInfo() {
+            const moduleCount = 6; // Number of main modules
+            const entityCount = 4; // Ball, Paddle, Brick, PowerUp
+            updateStatus(`📊 Loaded ${moduleCount} core modules, ${entityCount} entity classes. Modular architecture active!`);
+        }
+
+        function openTestRunner() {
+            updateStatus('🔬 Opening test runner...');
+            window.open('tests/test-runner.html', '_blank');
+        }
+
+        // Listen for game initialization
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                updateStatus('🚀 Modular game architecture loaded successfully!');
+            }, 1000);
+        });
+
+        // Make game accessible for testing
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for main.js to create the game instance
+            const checkGame = setInterval(() => {
+                if (window.game) {
+                    clearInterval(checkGame);
+                    updateStatus('🎮 Game instance ready for testing and interaction!');
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

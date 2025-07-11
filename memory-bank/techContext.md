@@ -19,15 +19,33 @@
 ### File Structure
 ```
 AIVincy/
-├── index.html          # Main game file (all-in-one)
-├── memory-bank/        # Project documentation
-│   ├── projectbrief.md
-│   ├── productContext.md
-│   ├── systemPatterns.md
-│   ├── techContext.md
-│   ├── activeContext.md
-│   └── progress.md
-└── README.md           # Project overview (optional)
+├── index.html              # Original single-file version
+├── index-original.html     # Backup of original
+├── index-modular.html      # New modular version
+├── README.md              # Project documentation
+├── src/                   # Source code (ES6 modules)
+│   ├── main.js           # Game initialization and main loop
+│   ├── config/           # Configuration
+│   │   └── GameConfig.js # Centralized game settings
+│   ├── core/             # Core systems
+│   │   └── InputManager.js # Input handling
+│   ├── entities/         # Game objects
+│   │   ├── Ball.js       # Ball entity with physics
+│   │   ├── Paddle.js     # Paddle entity with controls
+│   │   ├── Brick.js      # Brick entity with health system
+│   │   └── PowerUp.js    # Power-up entity
+│   ├── systems/          # Game systems
+│   │   └── PowerUpSystem.js # Enhanced power-up management
+│   └── utils/            # Utilities
+│       └── MathUtils.js  # Math and collision utilities
+├── tests/                # Testing framework
+│   ├── test-framework.js # Simple browser-based test runner
+│   ├── test-runner.html  # Test interface
+│   └── tests/            # Test files
+│       └── powerup-tests.js # Power-up system tests
+└── memory-bank/          # Project documentation
+    ├── features/         # Feature-specific documentation
+    └── development/      # Development workflow documentation
 ```
 
 ### Development Environment

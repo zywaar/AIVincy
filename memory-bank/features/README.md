@@ -3,9 +3,9 @@
 This directory contains detailed documentation for specific game features, making it easier to develop, maintain, and extend functionality.
 
 ## Current Features
-- [Power-ups System](powerups.md) - Wide Paddle, Multi-ball, Slow Ball mechanics
+- [Power-ups System](powerups.md) - Wide Paddle, Multi-ball, Slow Ball mechanics with visual timers
 - [AI Assistance](ai-assistance.md) - Adaptive difficulty and player performance tracking
-- [Physics Engine](physics.md) - Ball movement, collision detection, and bounce calculations
+- [Physics Engine](physics.md) - Ball movement, collision detection, and bounce calculations (to be documented)
 
 ## Planned Features
 - [Multiple Levels](levels.md) - Progressive difficulty and brick layouts
