@@ -15,17 +15,19 @@ export class Paddle {
   /**
    * Update paddle position based on input
    */
-  update(inputManager, canvasWidth) {
-    // Keyboard controls
-    const movement = inputManager.getPaddleMovement();
+  update(inputManager, canvasWidth, deltaTime = 1/60) {
+    // Time-based keyboard controls (20 pixels per second)
+    const movement = inputManager.getContinuousMovement();
     if (movement !== 0) {
-      this.x += movement * this.speed;
+      this.x += movement * this.speed * deltaTime;
     }
 
-    // Mouse controls (alternative)
-    const mousePos = inputManager.getMousePosition();
-    if (mousePos.x > 0) {
-      this.x = mousePos.x - this.width / 2;
+    // Mouse controls (alternative) - only if no keyboard input
+    if (movement === 0) {
+      const mousePos = inputManager.getMousePosition();
+      if (mousePos.x > 0) {
+        this.x = mousePos.x - this.width / 2;
+      }
     }
 
     // Keep paddle within bounds

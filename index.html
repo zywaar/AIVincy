@@ -216,9 +216,17 @@
         </div>
 
         <div class="controls">
-            <button onclick="testPowerUps()">🧪 Test Power-ups</button>
+            <h4 style="color: #00D4FF; margin: 10px 0 5px 0; font-size: 14px;">Power-up Testing</h4>
+            <button onclick="testWidePaddle()">🔧 Wide Paddle</button>
+            <button onclick="testMultiBall()">⚡ Multi Ball</button>
+            <button onclick="testSlowBall()">🐌 Slow Ball</button>
+            <button onclick="clearAllPowerUps()">❌ Clear All Power-ups</button>
+            <button onclick="forceDropPowerUp()">🎯 Force Drop Power-up</button>
+            
+            <h4 style="color: #00D4FF; margin: 15px 0 5px 0; font-size: 14px;">Development Tools</h4>
             <button onclick="showModuleInfo()">📊 Module Info</button>
             <button onclick="openTestRunner()">🔬 Run Tests</button>
+            <button onclick="showActivePowerUps()">⚡ Show Active Power-ups</button>
         </div>
 
         <div id="status" class="status">
@@ -237,23 +245,102 @@
             console.log(message);
         }
 
-        function testPowerUps() {
-            updateStatus('🧪 Testing power-up system...');
-            
-            // Access the game instance (will be available after main.js loads)
-            setTimeout(() => {
-                if (window.game) {
-                    // Force activate a power-up for testing
-                    window.game.powerUpSystem.forceActivatePowerUp('wide_paddle', {
-                        paddle: window.game.paddle,
-                        ball: window.game.ball,
-                        balls: [window.game.ball]
-                    });
-                    updateStatus('✅ Wide Paddle power-up activated for testing!');
+        // Individual power-up testing functions
+        function testWidePaddle() {
+            updateStatus('🔧 Testing Wide Paddle power-up...');
+            if (window.game) {
+                window.game.powerUpSystem.forceActivatePowerUp('wide_paddle', {
+                    paddle: window.game.paddle,
+                    balls: window.game.balls
+                });
+                updateStatus('✅ Wide Paddle power-up activated!');
+            } else {
+                updateStatus('❌ Game not yet initialized');
+            }
+        }
+
+        function testMultiBall() {
+            updateStatus('⚡ Testing Multi Ball power-up...');
+            if (window.game) {
+                window.game.powerUpSystem.forceActivatePowerUp('multi_ball', {
+                    paddle: window.game.paddle,
+                    balls: window.game.balls
+                });
+                updateStatus('✅ Multi Ball power-up activated!');
+            } else {
+                updateStatus('❌ Game not yet initialized');
+            }
+        }
+
+        function testSlowBall() {
+            updateStatus('🐌 Testing Slow Ball power-up...');
+            if (window.game) {
+                window.game.powerUpSystem.forceActivatePowerUp('slow_ball', {
+                    paddle: window.game.paddle,
+                    balls: window.game.balls
+                });
+                updateStatus('✅ Slow Ball power-up activated!');
+            } else {
+                updateStatus('❌ Game not yet initialized');
+            }
+        }
+
+        function clearAllPowerUps() {
+            updateStatus('❌ Clearing all active power-ups...');
+            if (window.game) {
+                // Clear all active power-ups
+                const powerUpSystem = window.game.powerUpSystem;
+                const activePowerUps = powerUpSystem.getActivePowerUps();
+                
+                activePowerUps.forEach(powerUp => {
+                    powerUpSystem.forceDeactivatePowerUp(powerUp.type);
+                });
+                
+                updateStatus(`✅ Cleared ${activePowerUps.length} active power-ups!`);
+            } else {
+                updateStatus('❌ Game not yet initialized');
+            }
+        }
+
+        function forceDropPowerUp() {
+            updateStatus('🎯 Forcing power-up drop...');
+            if (window.game) {
+                const paddle = window.game.paddle;
+                const powerUpTypes = ['wide_paddle', 'multi_ball', 'slow_ball'];
+                const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+                
+                window.game.powerUpSystem.dropPowerUp(
+                    paddle.getCenterX(), 
+                    paddle.y - 50, 
+                    randomType
+                );
+                updateStatus(`✅ Dropped ${randomType} power-up at paddle position!`);
+            } else {
+                updateStatus('❌ Game not yet initialized');
+            }
+        }
+
+        function showActivePowerUps() {
+            updateStatus('⚡ Checking active power-ups...');
+            if (window.game) {
+                const activePowerUps = window.game.powerUpSystem.getActivePowerUps();
+                if (activePowerUps.length === 0) {
+                    updateStatus('📊 No active power-ups currently');
                 } else {
-                    updateStatus('❌ Game not yet initialized');
+                    const powerUpList = activePowerUps.map(p => {
+                        const timeLeft = window.game.powerUpSystem.getPowerUpTimeRemaining(p.type);
+                        return `${p.type} (${timeLeft.toFixed(1)}s)`;
+                    }).join(', ');
+                    updateStatus(`📊 Active: ${powerUpList}`);
                 }
-            }, 100);
+            } else {
+                updateStatus('❌ Game not yet initialized');
+            }
+        }
+
+        // Legacy function for backward compatibility
+        function testPowerUps() {
+            testWidePaddle();
         }
 
         function showModuleInfo() {

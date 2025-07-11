@@ -109,6 +109,25 @@ export class InputManager {
   }
 
   /**
+   * Get continuous movement input for time-based movement
+   * Returns -1 for left, 1 for right, 0 for no movement or both keys pressed
+   */
+  getContinuousMovement() {
+    const leftPressed = this.isKeyPressed('ArrowLeft') || this.isKeyPressed('KeyA');
+    const rightPressed = this.isKeyPressed('ArrowRight') || this.isKeyPressed('KeyD');
+    
+    // If both keys are pressed simultaneously, no movement
+    if (leftPressed && rightPressed) {
+      return 0;
+    }
+    
+    // Return direction based on which key is pressed
+    if (leftPressed) return -1;
+    if (rightPressed) return 1;
+    return 0;
+  }
+
+  /**
    * Check for ball launch input
    */
   isBallLaunchPressed() {

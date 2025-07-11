@@ -35,11 +35,11 @@ class Game {
     console.log('🚀 All modules loaded successfully!');
   }
 
-  update() {
+  update(deltaTime) {
     if (this.state !== GameConfig.states.PLAYING) return;
 
-    // Update paddle
-    this.paddle.update(this.inputManager, GameConfig.canvas.width);
+    // Update paddle with delta time for smooth movement
+    this.paddle.update(this.inputManager, GameConfig.canvas.width, deltaTime);
     
     // Update all balls
     for (let i = this.balls.length - 1; i >= 0; i--) {
@@ -225,12 +225,12 @@ let game;
 let lastTime = 0;
 
 function gameLoop(currentTime) {
-  const deltaTime = currentTime - lastTime;
+  const deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
   lastTime = currentTime;
   
   if (game) {
     game.handleInput();
-    game.update();
+    game.update(deltaTime);
     game.render();
   }
   

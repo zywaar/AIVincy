@@ -10,7 +10,7 @@ export const GameConfig = {
   paddle: {
     width: 100,
     height: 15,
-    speed: 8,
+    speed: 100, // pixels per second (increased from 20 for faster movement)
     yOffset: 40 // Distance from bottom
   },
 

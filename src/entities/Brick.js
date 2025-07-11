@@ -97,11 +97,14 @@ export class Brick {
     ctx.fillRect(this.x + 1, this.y + 1, 3, 3); // Top-left
     ctx.fillRect(this.x + this.width - 4, this.y + 1, 3, 3); // Top-right
     
-    // Damage indicator - cracks using original color
+    // Damage indicator - cracks using original color with enhanced visibility
     if (this.health < this.maxHealth) {
-      // Add crack-like lines for damaged bricks
-      ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${(1 - healthPercent) * 0.5})`;
-      ctx.lineWidth = 1;
+      // Add crack-like lines for damaged bricks with brighter appearance
+      const crackOpacity = (1 - healthPercent) * 0.8; // Increased from 0.5 to 0.8
+      
+      // Main crack lines
+      ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${crackOpacity})`;
+      ctx.lineWidth = 1.5; // Slightly thicker for better visibility
       ctx.beginPath();
       
       // Random crack pattern based on brick position (consistent)
@@ -111,6 +114,26 @@ export class Brick {
       const crack2X = this.x + ((seed * 3) % this.width);
       const crack2Y = this.y + ((seed * 4) % this.height);
       
+      ctx.moveTo(crack1X, this.y);
+      ctx.lineTo(crack2X, this.y + this.height);
+      ctx.moveTo(this.x, crack1Y);
+      ctx.lineTo(this.x + this.width, crack2Y);
+      ctx.stroke();
+      
+      // Add subtle white highlights to cracks for glass effect
+      ctx.strokeStyle = `rgba(255, 255, 255, ${crackOpacity * 0.6})`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(crack1X + 1, this.y);
+      ctx.lineTo(crack2X + 1, this.y + this.height);
+      ctx.moveTo(this.x + 1, crack1Y);
+      ctx.lineTo(this.x + this.width + 1, crack2Y);
+      ctx.stroke();
+      
+      // Add glow effect around cracks
+      ctx.strokeStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${crackOpacity * 0.3})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
       ctx.moveTo(crack1X, this.y);
       ctx.lineTo(crack2X, this.y + this.height);
       ctx.moveTo(this.x, crack1Y);
