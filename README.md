@@ -40,9 +40,21 @@ AIVincy/
 This game uses ES6 modules and **requires an HTTP server** to function properly. Opening the file directly in a browser will result in CORS errors and a non-functional game.
 
 ### Start the Game
+
+#### Option 1: Custom Node.js Server (Recommended)
 ```bash
-# Start HTTP server (choose one method)
-npx serve . -p 8000          # NPX serve (recommended)
+# Start the custom server
+node server.js
+```
+
+Then access:
+- **Game**: `http://localhost:6018/`
+- **Tests**: `http://localhost:6018/tests/test-runner.html`
+
+#### Option 2: Alternative HTTP Servers
+```bash
+# Other server options
+npx serve . -p 8000          # NPX serve
 python -m http.server 8000   # Python 3
 php -S localhost:8000        # PHP built-in server
 ```
@@ -121,11 +133,13 @@ Then access:
 
 ### Run All Tests
 ```bash
-# Start HTTP server first
-npx serve . -p 8000
+# Option 1: Start custom server
+node server.js
+# Then access: http://localhost:6018/tests/test-runner.html
 
-# Then access test runner
-http://localhost:8000/tests/test-runner.html
+# Option 2: Alternative server
+npx serve . -p 8000
+# Then access: http://localhost:8000/tests/test-runner.html
 ```
 
 **Note**: Tests require HTTP server due to ES6 module imports.
@@ -170,9 +184,11 @@ http://localhost:8000/tests/test-runner.html
 ## 🤝 Contributing
 
 ### Development Setup
-1. **Start HTTP Server**: `npx serve . -p 8000` (required for ES6 modules)
-2. **Access Game**: `http://localhost:8000/index.html`
-3. **Run Tests**: `http://localhost:8000/tests/test-runner.html`
+1. **Start Custom Server**: `node server.js` (runs on port 6018)
+2. **Access Game**: `http://localhost:6018/`
+3. **Run Tests**: `http://localhost:6018/tests/test-runner.html`
+
+**Alternative**: Use `npx serve . -p 8000` and access via `http://localhost:8000/`
 
 ### Development Guidelines
 1. **Add Features**: Create new modules in appropriate directories

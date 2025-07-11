@@ -45,6 +45,17 @@ export const GameConfig = {
     }
   },
 
+  // Moving blocks settings (Hard Mode)
+  movingBlocks: {
+    width: 100,        // Same as paddle
+    height: 15,        // Same as paddle
+    speed1: 150,       // pixels per second for first block
+    speed2: 200,       // pixels per second for second block
+    color: '#FF6600',  // Tron orange
+    trailLength: 20,   // trail points
+    spacing: 30        // vertical spacing between blocks
+  },
+
   // Game settings
   game: {
     initialLives: 3,

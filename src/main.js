@@ -5,6 +5,7 @@ import { PowerUpSystem } from './systems/PowerUpSystem.js';
 import { Paddle } from './entities/Paddle.js';
 import { Ball } from './entities/Ball.js';
 import { Brick } from './entities/Brick.js';
+import { MovingBlock } from './entities/MovingBlock.js';
 
 // Simple Game Class for demonstration
 class Game {
@@ -29,6 +30,11 @@ class Game {
     this.score = 0;
     this.lives = GameConfig.game.initialLives;
     this.state = GameConfig.states.PLAYING;
+    
+    // Hard Mode properties
+    this.hardMode = false;
+    this.movingBlocks = [];
+    this.initializeMovingBlocks();
     
     console.log('🎮 Game initialized with modular structure!');
     console.log(`📊 Created ${this.bricks.length} bricks`);
@@ -64,6 +70,12 @@ class Game {
         this.balls.splice(i, 1);
       }
     }
+    
+    // Update moving blocks (Hard Mode)
+    this.updateMovingBlocks(deltaTime);
+    
+    // Check moving block collisions (Hard Mode)
+    this.checkMovingBlockCollisions();
     
     // Update power-up system
     this.powerUpSystem.update(GameConfig.canvas.height);
@@ -145,6 +157,9 @@ class Game {
       // Render power-ups
       this.powerUpSystem.renderFallingPowerUps(this.ctx);
       
+      // Render moving blocks (Hard Mode)
+      this.renderMovingBlocks();
+      
       // Render game objects
       this.paddle.render(this.ctx);
       this.balls.forEach(ball => ball.render(this.ctx));
@@ -210,12 +225,87 @@ class Game {
     )];
     
     this.powerUpSystem.clear();
+    
+    // Reset moving blocks if hard mode is active
+    if (this.hardMode) {
+      this.initializeMovingBlocks();
+    }
   }
 
   handleInput() {
     if (this.inputManager.isRestartPressed() && 
         (this.state === GameConfig.states.GAME_OVER || this.state === GameConfig.states.WIN)) {
       this.restart();
+    }
+  }
+
+  /**
+   * Initialize moving blocks for hard mode
+   */
+  initializeMovingBlocks() {
+    // Calculate positions halfway between paddle and lowest brick
+    const paddleY = this.paddle.y;
+    const lowestBrickY = GameConfig.bricks.startY + (GameConfig.bricks.rows * (GameConfig.bricks.height + GameConfig.bricks.padding));
+    const midY = paddleY - ((paddleY - lowestBrickY) / 2);
+    
+    // Create two moving blocks with different speeds and starting positions
+    this.movingBlocks = [
+      new MovingBlock(0, midY - GameConfig.movingBlocks.spacing, GameConfig.movingBlocks.speed1), // Start at left
+      new MovingBlock(GameConfig.canvas.width - GameConfig.movingBlocks.width, midY, GameConfig.movingBlocks.speed2) // Start at right
+    ];
+    
+    // Set initial directions (first block moves right, second moves left)
+    this.movingBlocks[0].direction = 1;
+    this.movingBlocks[1].direction = -1;
+  }
+
+  /**
+   * Update moving blocks (only when hard mode is active)
+   */
+  updateMovingBlocks(deltaTime) {
+    if (!this.hardMode) return;
+    
+    this.movingBlocks.forEach(block => {
+      block.update(GameConfig.canvas.width, deltaTime);
+    });
+  }
+
+  /**
+   * Check collisions between balls and moving blocks
+   */
+  checkMovingBlockCollisions() {
+    if (!this.hardMode) return;
+    
+    this.balls.forEach(ball => {
+      if (!ball.onPaddle) {
+        this.movingBlocks.forEach(block => {
+          block.checkCollisionWithBall(ball);
+        });
+      }
+    });
+  }
+
+  /**
+   * Render moving blocks (only when hard mode is active)
+   */
+  renderMovingBlocks() {
+    if (!this.hardMode) return;
+    
+    this.movingBlocks.forEach(block => {
+      block.render(this.ctx);
+    });
+  }
+
+  /**
+   * Toggle hard mode on/off
+   */
+  toggleHardMode() {
+    this.hardMode = !this.hardMode;
+    console.log(`🔥 Hard Mode ${this.hardMode ? 'activated' : 'deactivated'}!`);
+    
+    // Reset moving blocks when toggling
+    if (this.hardMode) {
+      this.initializeMovingBlocks();
     }
   }
 }

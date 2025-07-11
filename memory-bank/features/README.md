@@ -5,6 +5,7 @@ This directory contains detailed documentation for specific game features, makin
 ## Current Features
 - [Power-ups System](powerups.md) - Wide Paddle, Multi-ball, Slow Ball mechanics with visual timers
 - [AI Assistance](ai-assistance.md) - Adaptive difficulty and player performance tracking
+- [Hard Mode](hard-mode.md) - Dynamic moving obstacles with Tron orange styling and light trails
 - [Physics Engine](physics.md) - Ball movement, collision detection, and bounce calculations (to be documented)
 
 ## Planned Features
