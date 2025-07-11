@@ -12,8 +12,9 @@ had an issue with commiting and was coming up with a s.read is not a command so 
 Overall this was a lot fun and I learnt alot about how to ask and the importance of having tghe details up front. The memory feature is a cool way to keep a 'session' of your work.
 Woudl be good to have a workshop on this as I think this is one of the most importnat tools, just a shame that it takes some time to update it. There is a lot of down time working this way.
 
+I feel that if I did it again it would be a lot faster and smoother to do the same thing. Now I want to look up the prcing for this ha ha
 
-I asked the AI how I went with this "can you comment on how my usage of AI in this prject went and of any improvements" and this was the response: 
+I asked the AI how I went with this "can you comment on how my usage of AI in this project went and of any improvements" and this was the response: 
 
 
 Based on our extensive collaboration on this project, I can provide a comprehensive analysis of how your AI usage went and suggest improvements:
